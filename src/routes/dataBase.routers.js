@@ -1,8 +1,12 @@
 const { Router } = require("express");
-const { upDateDataBaseTeam } = require("../controllers/dataBase");
+const {
+	upDateDataBaseTeam,
+	upDateDataBasePlayer,
+} = require("../controllers/dataBase");
 
 const router = Router();
 
-router.get("/upDateTeam", upDateDataBaseTeam);
+router.post("/upDateTeam", upDateDataBaseTeam);
+router.post("/upDateRoster", upDateDataBasePlayer);
 
 exports.Router = router;

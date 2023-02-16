@@ -97,7 +97,7 @@ async function getTeamsData(req, res) {
 			return res.status(500).json({
 				status: 500,
 				statusText: "fail",
-				teams: err,
+				error: err,
 			});
 		});
 }
