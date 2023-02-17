@@ -53,10 +53,23 @@ async function upDateDataBasePlayer(req, res) {
 					hometownIdPlayer,
 				])
 				.then((idPlayer) => {
-					pool.query(
-						`INSERT INTO player_x_team (team_id, player_id, timestamp ) VALUES ((SELECT id FROM team WHERE name = '$1' LIMIT 1), $2, $3)`,
-						[player.nameTeam, idPlayer.rows[0].id, player.timestamp]
-					);
+					pool
+						.query(
+							`INSERT INTO player_x_team (team_id, player_id, timestamp ) VALUES ((SELECT id FROM team WHERE name = $1 LIMIT 1), $2, $3)`,
+							[player.nameTeam, idPlayer.rows[0].id, player.timestamp]
+						)
+						.catch((err) => {
+							return res.status(500).json({
+								status: 500,
+								error: err,
+							});
+						});
+				})
+				.catch((err) => {
+					return res.status(500).json({
+						status: 500,
+						error: err,
+					});
 				});
 		});
 
