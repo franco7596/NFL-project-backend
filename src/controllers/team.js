@@ -1,8 +1,36 @@
 const { pool } = require("../database/pgConection");
 
+function getQueryChecks(checks, nameTable) {
+	let queryExtra = "";
+	if (checks) {
+		Object.keys(checks).forEach((division) => {
+			if (checks[division]) {
+				if (queryExtra === "") {
+					queryExtra += ` ${nameTable}.id = ${[division]} `;
+				} else {
+					queryExtra += `OR ${nameTable}.id = ${[division]} `;
+				}
+			}
+		});
+	}
+	if (queryExtra !== "") {
+		queryExtra = " AND (" + queryExtra + ") ";
+	}
+	return queryExtra;
+}
+
 async function getTeamsData(req, res) {
+	const body = req.body;
+	const queryCheck = getQueryChecks(body.checkDivision, "D");
+	const orderBy = body.radioSort
+		? `ORDER BY ${body.radioSort}, T.id`
+		: "ORDER BY  T.id";
+	let querySearchName = "";
+	if (body.searchTeam) {
+		querySearchName = ` AND T.name ILIKE '%${body.searchTeam}%'`;
+	}
 	pool
-		.query(queryTeam + "ORDER BY T.id;")
+		.query(queryTeam + queryCheck + querySearchName + orderBy)
 		.then((resp) => {
 			let teams = [];
 			let team = {};
@@ -39,6 +67,9 @@ async function getTeamsData(req, res) {
 					};
 				}
 			});
+			if (team.id) {
+				teams.push(team);
+			}
 			return res.status(200).json({
 				status: 200,
 				statusText: "ok",
@@ -122,7 +153,7 @@ function getComboDivision(req, res) {
 			return res.status(200).json({
 				status: 200,
 				statusText: "ok",
-				divisions,
+				divisions: divisions.rows,
 			});
 		})
 		.catch((err) => {
@@ -157,10 +188,8 @@ const queryTeam = `
 			FROM team AS T
 			INNER JOIN stadium AS S
 			ON T.stadium_id = S.id
-			INNER JOIN team_x_division AS TXD
-			ON T.id = TXD.id_team
 			INNER JOIN division AS D
-			ON TXD.id_division = D.id
+			ON T.division_id = D.id
 			INNER JOIN games AS G
 			ON T.id = G.team_id
 			INNER JOIN team_x_head_coach AS TXH
@@ -174,9 +203,6 @@ const queryTeam = `
 			WHERE
 			G.timestamp =
 			(SELECT MAX(games.timestamp) FROM games WHERE games.team_id = T.id )
-			AND
-			TXD.timestamp =
-			(SELECT MAX(team_x_division.timestamp) FROM team_x_division WHERE team_x_division.id_team = T.id )
 			AND
 			TXH.timestamp =
 			(SELECT MAX(team_x_head_coach.timestamp) FROM team_x_head_coach WHERE team_x_head_coach.id_team = T.id )

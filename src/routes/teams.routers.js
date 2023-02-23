@@ -6,7 +6,7 @@ const {
 } = require("../controllers/team");
 const router = Router();
 
-router.get("/getTeam", getTeamsData);
+router.post("/getTeam", getTeamsData);
 router.get("/getTeamById", getTeamsById);
 router.get("/getComboDivision", getComboDivision);
 
