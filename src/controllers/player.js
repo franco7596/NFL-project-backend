@@ -1,7 +1,7 @@
 const { pool } = require("../database/pgConection");
 
 async function getPlayersData(req, res) {
-	const { page } = req.query;
+	const { page = 1 } = req.query;
 	const numPage = parseInt(page) - 1;
 	const queyToDatabase =
 		queryGetPlayer +
@@ -126,8 +126,34 @@ async function getPlayersByTeam(req, res) {
 		});
 }
 
+function getComboStatus(req, res) {
+	pool
+		.query(
+			`
+			SELECT *
+			FROM status
+			ORDER BY name
+			`
+		)
+		.then((status) => {
+			return res.status(200).json({
+				status: 200,
+				statusText: "ok",
+				statusPlayer: status.rows,
+			});
+		})
+		.catch((err) => {
+			return res.status(500).json({
+				status: 500,
+				statusText: "fail",
+				error: err,
+			});
+		});
+}
+
 exports.getPlayersData = getPlayersData;
 exports.getPlayersByTeam = getPlayersByTeam;
+exports.getComboStatus = getComboStatus;
 
 const queryGetPlayer = `
 			SELECT
