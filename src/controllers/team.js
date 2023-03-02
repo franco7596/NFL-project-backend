@@ -1,33 +1,15 @@
 const { pool } = require("../database/pgConection");
-
-function getQueryChecks(checks, nameTable) {
-	let queryExtra = "";
-	if (checks) {
-		Object.keys(checks).forEach((division) => {
-			if (checks[division]) {
-				if (queryExtra === "") {
-					queryExtra += ` ${nameTable}.id = ${[division]} `;
-				} else {
-					queryExtra += `OR ${nameTable}.id = ${[division]} `;
-				}
-			}
-		});
-	}
-	if (queryExtra !== "") {
-		queryExtra = " AND (" + queryExtra + ") ";
-	}
-	return queryExtra;
-}
+const { getQueryChecks } = require("../helpers/filters");
 
 async function getTeamsData(req, res) {
 	const body = req.body;
-	const queryCheck = getQueryChecks(body.checkDivision, "D");
-	const orderBy = body.radioSort
-		? `ORDER BY ${body.radioSort}, T.id`
+	const queryCheck = getQueryChecks(body.checkOptions, "D");
+	const orderBy = body.sortSelected
+		? `ORDER BY ${body.sortSelected}, T.id`
 		: "ORDER BY  T.id";
 	let querySearchName = "";
-	if (body.searchTeam) {
-		querySearchName = ` AND T.name ILIKE '%${body.searchTeam}%'`;
+	if (body.searchInpit) {
+		querySearchName = ` AND T.name ILIKE '%${body.searchInpit}%'`;
 	}
 	pool
 		.query(queryTeam + queryCheck + querySearchName + orderBy)

@@ -1,16 +1,44 @@
 const { pool } = require("../database/pgConection");
+const { getQueryChecks, getQueryChecksCant } = require("../helpers/filters");
 
 async function getPlayersData(req, res) {
 	const { page = 1 } = req.query;
+	const body = req.body;
+	const queryCheck = getQueryChecks(body.checkOptions, "S");
+	const orderBy = body.sortSelected
+		? `ORDER BY ${body.sortSelected}, P.id`
+		: "ORDER BY  P.id";
+	let querySearchName = "";
+	if (body.searchInpit) {
+		querySearchName = ` AND P.name ILIKE '%${body.searchInpit}%'`;
+	}
 	const numPage = parseInt(page) - 1;
 	const queyToDatabase =
 		queryGetPlayer +
+		queryCheck +
+		querySearchName +
+		orderBy +
 		`
-			order by id offset ${numPage * 50} rows fetch next 50 rows only;
+			offset ${numPage * 50} rows fetch next 50 rows only;
 	`;
-	const queryCantPlayers = `
-		SELECT COUNT(id) FROM player
-	`;
+	let queryCantPlayers = "";
+	if (queryCheck !== "" || querySearchName !== "") {
+		const queryCheckCant = getQueryChecksCant(body.checkOptions, "status_id");
+		if (body.searchInpit) {
+			if (queryCheckCant) {
+				querySearchName = ` AND name ILIKE '%${body.searchInpit}%'`;
+			} else {
+				querySearchName = ` name ILIKE '%${body.searchInpit}%'`;
+			}
+		}
+		queryCantPlayers = `
+			SELECT COUNT(id) FROM player WHERE ${queryCheckCant + querySearchName}
+		`;
+	} else {
+		queryCantPlayers = `
+			SELECT COUNT(id) FROM player
+		`;
+	}
 	pool
 		.query(queryCantPlayers)
 		.then((cantPlayers) => {
@@ -35,6 +63,7 @@ async function getPlayersData(req, res) {
 							infoCurrentTeam: {
 								id: rowPlayer.id_team,
 								name: rowPlayer.name_team,
+								image: rowPlayer.logo_team,
 								position: rowPlayer.name_position,
 								number: rowPlayer.number,
 								status: rowPlayer.name_status,
@@ -99,6 +128,7 @@ async function getPlayersByTeam(req, res) {
 					infoCurrentTeam: {
 						id: rowPlayer.id_team,
 						name: rowPlayer.name_team,
+						image: rowPlayer.logo_team,
 						position: rowPlayer.name_position,
 						number: rowPlayer.number,
 						status: rowPlayer.name_status,
@@ -115,6 +145,60 @@ async function getPlayersByTeam(req, res) {
 				status: 200,
 				statusText: "ok",
 				players: players,
+			});
+		})
+		.catch((err) => {
+			return res.status(500).json({
+				status: 500,
+				statusText: "fail",
+				error: err,
+			});
+		});
+}
+
+async function getPlayerById(req, res) {
+	const { id_player } = req.query;
+	const queyToDatabase =
+		queryGetPlayer +
+		`
+			AND p.id = $1;
+	`;
+	pool
+		.query(queyToDatabase, [id_player])
+		.then((resp) => {
+			let player = {
+				id: resp.rows[0].id,
+				infoPlayer: {
+					name: resp.rows[0].name_player,
+					height: resp.rows[0].height,
+					age: resp.rows[0].age,
+					experience: resp.rows[0].experience,
+					weight: resp.rows[0].weight,
+					arms: resp.rows[0].arms,
+					hands: resp.rows[0].hands,
+				},
+				images: {
+					photo: resp.rows[0].image,
+				},
+				infoCurrentTeam: {
+					id: resp.rows[0].id_team,
+					name: resp.rows[0].name_team,
+					image: resp.rows[0].logo_team,
+					position: resp.rows[0].name_position,
+					number: resp.rows[0].number,
+					status: resp.rows[0].name_status,
+				},
+				hometown: {
+					name: resp.rows[0].name_hometown,
+				},
+				college: {
+					name: resp.rows[0].name_college,
+				},
+			};
+			return res.status(200).json({
+				status: 200,
+				statusText: "ok",
+				player: player,
 			});
 		})
 		.catch((err) => {
@@ -154,6 +238,7 @@ function getComboStatus(req, res) {
 exports.getPlayersData = getPlayersData;
 exports.getPlayersByTeam = getPlayersByTeam;
 exports.getComboStatus = getComboStatus;
+exports.getPlayerById = getPlayerById;
 
 const queryGetPlayer = `
 			SELECT
@@ -173,7 +258,8 @@ const queryGetPlayer = `
 			C.name AS name_college,
 			(SELECT COUNT(id) FROM player) AS cant_players,
 			T.id AS id_team,
-			T.name AS name_team
+			T.name AS name_team,
+			T.image AS logo_team
 			FROM player AS P
 			INNER JOIN status AS S
 			ON P.status_id = S.id
