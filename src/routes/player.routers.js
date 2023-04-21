@@ -8,7 +8,7 @@ const {
 const router = Router();
 
 router.post("/getPlayers", getPlayersData);
-router.get("/getPlayersByTeam", getPlayersByTeam);
+router.post("/getPlayersByTeam", getPlayersByTeam);
 router.get("/getPlayersById", getPlayerById);
 router.get("/getComboStatus", getComboStatus);
 

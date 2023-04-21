@@ -102,11 +102,20 @@ async function getPlayersData(req, res) {
 }
 async function getPlayersByTeam(req, res) {
 	const { id_team } = req.query;
-	const queyToDatabase =
+	const body = req.body;
+	let queyToDatabase =
 		queryGetPlayer +
 		`
-			AND T.id = $1;
+			AND T.id = $1
 	`;
+	if (body.status) {
+		queyToDatabase += ` AND P.status_id = (SELECT id FROM status WHERE name = '${body.status}')`;
+	}
+	if (body.searchInpit) {
+		queyToDatabase += ` AND (P.name ILIKE '%${body.searchInpit}%' 
+		OR P.college_id IN (SELECT id FROM college WHERE name ILIKE '%${body.searchInpit}%') 
+		OR P.hometown_id IN (SELECT id FROM hometown WHERE name ILIKE '%${body.searchInpit}%'))`;
+	}
 	pool
 		.query(queyToDatabase, [id_team])
 		.then((resp) => {
