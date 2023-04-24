@@ -1,3 +1,3 @@
 exports.seting = {
-	port: 3300,
+  port: process.env.PORT || 8080,
 };
