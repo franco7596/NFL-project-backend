@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1
 
 # Adjust NODE_VERSION as desired
-ARG NODE_VERSION=16.18.0
+ARG NODE_VERSION=16.13.1
 FROM node:${NODE_VERSION}-slim as base
 
 LABEL fly_launch_runtime="NodeJS"
@@ -17,9 +17,11 @@ ENV NODE_ENV=production
 FROM base as build
 
 # Install packages needed to build node modules
+# RUN apt-get update -qq && \
+#     apt-get install -y python-is-python3 pkg-config build-essential 
 RUN apt-get update -qq && \
     apt-get install -y python3 pkg-config build-essential
-
+    
 # Install node modules
 COPY --link package.json package-lock.json .
 RUN npm install

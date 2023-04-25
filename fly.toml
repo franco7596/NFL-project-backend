@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for backendnfl on 2023-04-23T16:31:23-03:00
+# fly.toml app configuration file generated for nflbackend on 2023-04-24T16:28:31-03:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "backendnfl"
+app = "nflbackend"
 primary_region = "sea"
 
 [env]
