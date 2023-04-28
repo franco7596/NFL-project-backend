@@ -1,7 +1,7 @@
 ## NFL Back-End project
 I'm thrilled to announce that my latest project is now live and accessible to everyone! This is a backend application that I built using Node.js and Express to communicate securely with the frontend of the NFL application, using JWT authentication. The application utilizes PostgreSQL as a database to store information about teams and players.
 
-The backend application is responsible for making requests to the Scrapy server, which is hosted on an AWS EC2 instance, using Axios to manage HTTP requests and Scrapyrt to manage the responses. The backend restructures the data obtained from Scrapy and stores it in the relational database. Lastly, it generates a RESTful API for the frontend to query for information about teams and players, and to activate the action of rescraping the NFL website to update the data.
+The backend application is responsible for making requests to the Scrapy server, which is hosted on an AWS EC2 instance, using Axios to manage HTTP requests and Scrapyrt to manage the responses. The backend restructures the data obtained from Scrapy and stores it in the relational database, which is deployed on AWS. The backend itself is deployed on fly.io, a platform that provides reliable and scalable infrastructure for running applications.
 
 I'm proud of the hard work I put into this project, and I'm excited to see it in action. This backend application has been designed to work seamlessly with the frontend, and I believe it will help NFL enthusiasts keep up with their favorite teams and players.
 
