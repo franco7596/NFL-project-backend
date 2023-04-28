@@ -28,6 +28,8 @@ You can check out my project on GitHub, where you'll find all the code for the a
 
 - Install all necessary dependencies inside the project directory using npm install.
 
+- Finally, start the project with npm run start, which will launch the Expo dashboard in the browser.
+
 ## The link to the webpage.:
 
 [NFL](https://ribotta-franco-nfl.vercel.app/)
